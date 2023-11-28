@@ -233,3 +233,16 @@ List接口是 Collection 接口的子类
 //		读取文件： Properries
 ```
 
+## Collection 工具类
+
+Collection 工具类介绍
+
+1）Collection 是一个操作 Set List Map 等集合的工具类
+
+2）Collection 中提供了一系列**静态**方法对集合元素进行排序，查询和修好的操作
+
+1. reverse(List) : 反转 List 中元素的顺序
+2. shuffle（List）：对 List 集合元素进行随机排序
+3. sort（List）：根据元素的自然顺序 对指定的 List 集合按升序进行排序
+4. sort(List, Comparator) : 根据指定的 Compaartor 产生的顺序对 List 集合元素进行排序
+5. swap（List， int， int） ： 将指定 list 集合中 i 处元素和 j 出的元素进行交换
