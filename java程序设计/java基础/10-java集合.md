@@ -233,3 +233,4 @@ List接口是 Collection 接口的子类
 //		读取文件： Properries
 ```
 
+![image-20231128124640147](https://raw.githubusercontent.com/tingzhuk/myNote/master/java%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/image/image-20231128124640147.png)
