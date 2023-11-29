@@ -246,3 +246,11 @@ Collection 工具类介绍
 3. sort（List）：根据元素的自然顺序 对指定的 List 集合按升序进行排序
 4. sort(List, Comparator) : 根据指定的 Compaartor 产生的顺序对 List 集合元素进行排序
 5. swap（List， int， int） ： 将指定 list 集合中 i 处元素和 j 出的元素进行交换
+
+### HashSet 的去重机制
+
+HashSet 的去重机制： hashCode() + equals(), 底层先通过存入对象， 进行运算得到一个 hash 值， 通过hash 值得到对应的索引，如果发现table 索引所在的位置没有数据， 就直接存放， 如果有数据，就进行equals 的比较[遍历比较] 如果比较后， 不相同就加入，否则就不假如
+
+### TreeSet 去重机制
+
+TreeSet 的去重机制： 如果传入了一个 Comparator 匿名对象，就用实现了 Compare 去重， 如果方法返回 0， 就认为 是相同的元素/数据，就不添加， 如果没有传入 Comparator 匿名对象，则就以你添加的对象去实现Compareable 接口的 compareTo去重
