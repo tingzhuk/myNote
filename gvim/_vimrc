@@ -1,0 +1,261 @@
+" Vim with all enhancements
+source $VIMRUNTIME/vimrc_example.vim
+
+" Use the internal diff if available.
+" Otherwise use the special 'diffexpr' for Windows.
+if &diffopt !~# 'internal'
+  set diffexpr=MyDiff()
+endif
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg1 = substitute(arg1, '!', '\!', 'g')
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg2 = substitute(arg2, '!', '\!', 'g')
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let arg3 = substitute(arg3, '!', '\!', 'g')
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      if empty(&shellxquote)
+        let l:shxq_sav = ''
+        set shellxquote&
+      endif
+      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  let cmd = substitute(cmd, '!', '\!', 'g')
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  if exists('l:shxq_sav')
+    let &shellxquote=l:shxq_sav
+  endif
+endfunction
+
+
+" -------------------------------------------------------
+" ----------------相关的配置-----------------------------
+" 装插件要求，适应新版本
+" 让 vim 识别不同的文件格式
+set nocompatible
+filetype on
+filetype indent on
+filetype plugin on
+filetype plugin indent on
+" 让你的编辑器可以使用鼠标
+set mouse=a
+set encoding=utf-8
+" 解决有些颜色不对的情况
+let &t_ut=''
+" 更改 tab 缩进的距离
+set expandtab
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+" 显示行尾的空格
+set list
+set listchars=tab:▸\ ,trail:▫
+set scrolloff=5
+" 缩进有关
+set tw=0
+set indentexpr=
+set backspace=indent,eol,start
+set foldmethod=indent
+set foldlevel=99
+" 神奇，让 vim 在不同的模式下有不同的光标样式
+let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+let &t_SR = "\<Esc>]50;CursorShape=2\x7"
+let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+set laststatus=2
+set autochdir
+" 关闭文件之后打开文件，光标会在上次关闭的位置
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+
+
+" 让 leader 键为空格键
+let mapleader=" "
+
+" 显示行号
+set number
+" 代码高亮
+syntax on
+" 显示当前行是 开始行 关闭状态 打开的话把 no 去掉
+set norelativenumber
+" 在当前光标的位置显示一条线
+set cursorline
+" 使字不会超出当前窗口的位置， 会有一个换行的动作
+set wrap
+" 看到自己打了什么字母
+set showcmd
+" 按tab键弹出补全菜单
+set wildmenu
+" 颜色主题
+colorscheme slate
+" 字体大小种类
+set guifont=Cascadia_Code:h15:cANSI:qDRAFT
+
+" 高亮搜索结果
+set hlsearch
+exec "nohlsearch"
+" 边输边高亮
+set incsearch
+" 查找的时候忽略大小写
+set ignorecase
+" 智能大小写
+set smartcase
+
+" 上一条搜索记录下一条搜索记录， zz 中心
+noremap = nzz
+noremap - Nzz
+
+" 空格 + 回车 关闭查询高亮 即关闭所有的搜索结果
+noremap <LEADER><CR> :nohlsearch<CR>
+
+
+
+
+" noremp 更改键位
+" k - > i  上移
+" j - > k  下移
+" h - > j  左移
+noremap i k
+noremap I 5k
+noremap k j
+noremap K 5j
+noremap j h
+noremap J 5h
+noremap L 5l
+
+" 原来的 i 插入被占了 用  h 替代
+noremap h i
+noremap H I
+
+" 普通模式 按 S  - >  w加回车
+map S :w<CR>
+" s 所有的绑定取消 相当于随便按没有用
+map s <nop>
+" 普通模式按 Q 退出
+map Q :q<CR>
+
+" 每次按 R 刷新加载 $MYVVIMRC 配置
+map R :source $MYVIMRC<CR>
+" 普通模式下 用 ; 替换 ：
+map ; :
+
+" 往右边分屏操作，光标在右  边
+map sl :set splitright<CR>:vsplit<CR>
+" 往左边分屏
+map sj :set nosplitright<CR>:vsplit<CR>
+" 往上边进行分屏
+map si :set nosplitbelow<CR>:split<CR>
+" 往下边进行分屏
+map sk :set splitbelow<CR>:split<CR>
+
+" 分屏之后怎样移动光标在分屏之间移动
+" 这里我想使 空格 + 上下左右， 是光标在分屏间移动
+" 右边移动
+map <LEADER>l <C-w>l
+" 上边移动
+map <LEADER>i <C-w>k
+" 左边移动
+map <LEADER>j <C-w>h
+" 向下移动
+map <LEADER>k <C-w>j
+
+" 通过上下左右箭头控制分屏的大小
+" 想要哪边变大就按哪个箭头
+map <up> :res +5<CR>
+map <down> :res -5<CR>
+map <left> :vertical resize-5<CR>
+map <right> :vertical resize+5<CR>
+
+" ti 打开新的标签页
+map ti :tabe<CR>
+" tl 到右边的标签页
+map tl :+tabnext<CR>
+" tj 到左边的标签页
+map tj :-tabnext<CR>
+
+" 上下分屏改左右分屏， 左右分屏改上下分屏
+" 变为左右分屏
+map sv <C-w>t<C-w>H
+" 变为上下分屏
+map sh <C-w>t<C-w>K
+
+" ----------------------------------------------------------------
+
+
+
+
+" ----------------------------------------------------------------
+"--------------------插件......-----------------------------------
+
+" vim-plug  这是一个插件管理器
+call plug#begin('~/vimfiles/plugged')
+" The default plugin directory will be as follows:
+"   - Vim (Linux/macOS): '~/.vim/plugged'
+"   - Vim (Windows): '~/vimfiles/plugged'
+"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
+" You can specify a custom plugin directory by passing it as the argument
+"   - e.g. `call plug#begin('~/.vim/plugged')`
+"   - Avoid using standard Vim directory names like 'plugin'
+
+
+
+Plug 'vim-airline/vim-airline'
+Plug 'connorholyday/vim-snazzy'
+Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'ycm-core/YouCompleteMe'
+Plug 'dense-analysis/ale'
+Plug 'preservim/tagbar', { 'on': 'TagbarOpenAutoClose' }
+Plug 'mbbill/undotree'
+Plug 'ycm-core/YouCompleteMe'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'itchyny/vim-cursorword'
+Plug 'rhysd/conflict-marker.vim'
+Plug 'tpope/vim-fugitive'
+Plug 'mhinz/vim-signify'
+Plug 'gisphm/vim-gitignore', { 'for': ['gitignore', 'vim-plug'] }
+Plug 'elzr/vim-json'
+Plug 'hail2u/vim-css3-syntax'
+Plug 'spf13/PIV', { 'for' :['php', 'vim-plug'] }
+Plug 'gko/vim-coloresque', { 'for': ['vim-plug', 'php', 'html', 'javascript', 'css', 'less'] }
+Plug 'pangloss/vim-javascript', { 'for' :['javascript', 'vim-plug'] }
+Plug 'mattn/emmet-vim'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install_sync() }, 'for' :['markdown', 'vim-plug'] }
+Plug 'dhruvasagar/vim-table-mode', { 'on': 'TableModeToggle' }
+Plug 'vimwiki/vimwiki'
+Plug 'kshenoy/vim-signature'
+Plug 'terryma/vim-multiple-cursors'
+Plug 'junegunn/goyo.vim' " distraction free writing mode
+Plug 'tpope/vim-surround' " type ysks' to wrap the word with '' or type cs'` to change 'word' to `word`
+Plug 'godlygeek/tabular' " type ;Tabularize /= to align the =
+Plug 'gcmt/wildfire.vim' " in Visual mode, type i' to select all text in '', or type i) i] i} ip
+Plug 'scrooloose/nerdcommenter' " in <space>cc to comment a line
+Plug 'MarcWeber/vim-addon-mw-utils'
+Plug 'kana/vim-textobj-user'
+Plug 'fadein/vim-FIGlet'
+
+
+call plug#end()
+" You can revert the settings after the call like so:
+"   filetype indent off   " Disable file-type-specific indentation
+"   syntax off            " Disable syntax highlighting
+
+
+" 把颜色切换为 snazzy  (这个东西可能有 bug, 每次加载的时候底色变白)
+" 在上面通过 let &t_ut=''  解决
+color snazzy
+" 透明背景   windows 不显示  linux 可以显示
+" let g:SnazzyTransparent = 1
+
+
