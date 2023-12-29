@@ -342,3 +342,225 @@ select * from score;
 
 ```
 
+### 基本查询
+
+```sql
+-- 查询 student 表的所有行
+select * from student;
+
+-- 查询 student 表中的 name, sex, class 字段的所有行
+select name, sex, class from student;
+
+-- 查询 teacher 表中不重复 department 列
+select distinct department from teacher;
+
+-- 查询 score 表中成绩在 60 - 80 之间的所有行（区间查询和运算符）
+-- between xxx and xxx      查询区间 ， and 表示 “并且”
+select * from score where degree between 60 and 80;
+select * from score where degree >= 60 and degree <= 80;
+
+-- 查询 score 表中成绩为 85 86 或 87 的行
+-- IN ：查询规定中的多个值
+select * from score where degree in (85, 86, 97);
+
+-- 查询 student 表中 '95031' 班或性别为 ‘女’ 的 所有行
+-- or ：表示或者关系
+select * from student where class = '95031' or sex = '女';
+
+-- 以 class 降序方式查询 student 表中的所有行
+-- DESC 降序， 从高到低
+-- ASC(默认可以不写) 升序 ， 从高到低
+select * from student order by class desc ;
+select * from student order by class ;
+
+-- 以 c_no 升序， degree 降序查询 score 表中的所有行 (默认就是升序)
+select * from score order by c_no , degree desc;
+
+-- 查询 ‘95031’ 班的学生人数
+-- COUNT : 统计
+select count(*) from student where class = '95031';
+
+-- 查询 score 表中最高分学生的学号和课程编号（子查询或排序查询）
+select s_no, c_no from score where degree = (select max(degree) from score);
+
+-- 排序查询
+-- limit r, n  表示从第 r 行开始， 查询 n 条数据
+select s_no, c_no, degree from score order by degree desc
+limit 0, 1;
+```
+
+### 分组计算平均成绩
+
+**查询每门课的平均成绩**
+
+```sql
+-- AVG : 平均值
+select avg(degree) from score where c_no = '3-105';
+select avg(degree) from score where c_no = '3-245';
+select avg(degree) from score where c_no = '6-166';
+
+-- GROUP BY ： 分组查询
+select c_no, avg(degree) from score group by c_no;
+
+```
+
+### 分组条件于模糊查询
+
+**查询 `score` 表中至少有两名学生选修，并且以 3 开头的课程的平均数**
+
+```sql
+-- 首先把 c_no avg(degree) 通过分组查询出来
+select c_no, avg(degree) from score group by c_no;
+
+-- 在上面的基础上查询出至少有 3 名学生选修的课程
+select c_no as '课程编号', avg(degree) as '平均成绩', count(c_no) as '选修人数' from score group by c_no
+having count(c_no) >= 2;
+
+-- 在上面的基础上，查询出课程编号以 3 开头的
+-- 这里使用 like 进行模糊查询： % 表示任意个个字符的通配符
+select c_no as '课程编号', avg(degree) as '平均成绩', count(c_no) as '选修人数'
+from score
+group by c_no
+having count(c_no) >= 2 and c_no like '3%';
+```
+
+### 多表查询 -1
+
+查询所有学会生的 name 以及 该学生在 `score` 表中对应的 `c_no` 和 `degree`
+
+```sql
+-- from..... :  表示从 student, score 表中查询
+-- where 的条件表示为， 只有在 student.no 和 score.c_no 相等是才显示出来
+select name, c_no, degree from student, score
+where student.no = score.s_no;
+```
+
+### 多表查询 -2
+
+**查询所有学生的 `no` 、课程名称 ( `course` 表中的 `name` ) 和成绩 ( `score` 表中的 `degree` ) 列。**
+
+```sql
+-- 表示获得这个字段的别名
+select s_no, name as c_name, degree from score, course
+where score.c_no = course.no;
+```
+
+### 三表联合查询
+
+**查询所有学生的 `name` 、课程名 ( `course` 表中的 `name` ) 和 `degree` 。**
+
+```sql
+-- 查询所有学生的 name， 课程名和 degree
+-- 不难发现只有 score 表中关联了学生的学号和课程号
+-- 只要 把 score 表中的 s_no c_no  替换成 student course  表中的 name 就可以了
+select student.name as s_name, course.name as c_name, degree from score, student, course
+where student.no = score.s_no and score.c_no = course.no;
+```
+
+### 子查询 + 分组求平均成绩
+
+```sql
+-- 查询 95031 班 学生 每门课程的平均成绩
+-- 1. 先获得 95031 班所有学生的 学号
+-- 2. 在按课程号进行分组，求每门课平均成绩
+select c_no, avg(degree) as '平均成绩'
+from score
+where s_no in (SELECT no FROM student WHERE class = '95031')
+group by c_no;
+
+```
+
+### 子查询-1
+
+**查询在 `3-105` 课程中，所有成绩高于 `109` 号同学的记录。**
+
+```sql
+-- 查询在 3-105 课程中，所有成绩高于 109 号同学的记录。
+SELECT * FROM score
+WHERE c_no = '3-105' AND degree > (SELECT degree FROM score WHERE s_no = '109' AND c_no = '3-105');
+```
+
+### 子查询-2
+
+**查询所有成绩高于 `109` 号同学的 `3-105` 课程成绩记录。**
+
+```sql
+-- 查询所有成绩高于 109 号同学的 3-105 课程成绩记录。
+SELECT * FROM score
+WHERE degree > (SELECT degree FROM score WHERE s_no = '109' AND c_no = '3-105');
+```
+
+### `YEAR` 函数 与 带 in 关键字查询
+
+```sql
+-- 查询所有和 101 、108 号学生同年出生的 no 、name 、birthday 列。
+SELECT no, name, birthday FROM student
+where YEAR(birthday) in (SELECT YEAR(birthday) FROM student WHERE no IN('101','108'));
+```
+
+### 多层嵌套查询
+
+**查询 `'张旭'` 教师任课的学生成绩表。**
+
+```sql
+-- 查询 '张旭' 教师任课的学生成绩表。
+select * from teacher;
+select * from course;
+
+SELECT * FROM score WHERE c_no IN (
+    SELECT no FROM course WHERE t_no IN (
+        SELECT no FROM teacher WHERE name = '张旭'
+        )
+    );
+```
+
+### 多表查询
+
+**查询某选修课程多于5个同学的教师姓名。**
+
+```sql
+-- 查询某选修课程多于5个同学的教师姓名。
+-- 1. 从成绩表中 按 c_no 进行分类， 找出 选修人数大于 5 的 课程编号
+-- 2. 根据课程编号在课程表中找到教师编号
+-- 3. 根据教师编号在教师表中找到 教师姓名
+SELECT name FROM teacher WHERE no IN (
+    SELECT t_no FROM course WHERE no IN (
+        SELECT c_no FROM score GROUP BY c_no HAVING COUNT(c_no) > 5
+        )
+    );
+
+```
+
+### 子查询 -3
+
+**查询 “计算机系” 课程的成绩表。**
+
+```sql
+-- 查询 “计算机系” 课程的成绩表。
+-- 1. 根据表结构 teacher 表中有哪个教师是哪个系的，因此，查询教师表中系别是计算机系的教师的 no
+-- 2. 根据上一步查找 的 教师 no 在查找课程表，看看计算机系的老师都教了哪些课程
+-- 3. 根据上一步的课程编号即可查到计算机系 课程的成绩表
+select * from score where c_no in (
+    SELECT no FROM course WHERE t_no IN (
+        SELECT no FROM teacher WHERE department = '计算机系'
+        )
+    );
+```
+
+### UNION 和 NOTIN 的使用
+
+**查询 `计算机系` 与 `电子工程系` 中的不同职称的教师。**
+
+```SQL
+-- NOT 代表逻辑非
+-- UNION 合并两个集合
+-- 要求 : 查找计算机系和电子工程系不同职称的来时信息
+SELECT * FROM teacher WHERE department = '计算机系' AND profession NOT IN (
+    SELECT profession FROM teacher WHERE department = '电子工程系'
+    )
+UNION
+SELECT * FROM teacher WHERE department = '电子工程系' AND profession NOT IN (
+    SELECT profession FROM teacher WHERE department = '计算机系'
+    );
+```
+
